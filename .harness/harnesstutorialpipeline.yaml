@@ -14,7 +14,6 @@ pipeline:
     - stage:
         name: Build Test and Push
         identifier: Build_Test_and_Push
-        description: ""
         type: CI
         spec:
           cloneCodebase: true
@@ -54,6 +53,67 @@ pipeline:
                     repo: nargallegos/ciquickstart
                     tags:
                       - <+pipeline.sequenceId>
+        variables:
+          - name: SONARQUBE_ACCESS_KEY
+            type: Secret
+            description: ""
+            value: sonarqube_tutorial_key
+    - stage:
+        name: Sonarqube
+        identifier: Sonarqube
+        type: SecurityTests
+        spec:
+          cloneCodebase: true
+          sharedPaths:
+            - /var/run
+            - /var/lib/docker
+          infrastructure:
+            useFromStage: Build_Test_and_Push
+          serviceDependencies:
+            - identifier: dind_service
+              name: dind_service
+              type: Service
+              spec:
+                connectorRef: docker_dind
+                image: docker:dind
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: docker connector
+                  identifier: docker_connector
+                  spec:
+                    connectorRef: docker_dind
+                    image: docker:dind
+                    shell: Sh
+                    command: |
+                      while ! docker ps ;do   
+                            echo "Docker not available yet"  
+                      done  
+                      echo "Docker Service Ready"  
+                      docker ps  
+              - step:
+                  type: Security
+                  name: Sonarqube Scan
+                  identifier: Sonarqube_Scan
+                  spec:
+                    privileged: true
+                    settings:
+                      policy_type: orchestratedScan
+                      scan_type: repository
+                      product_name: sonarqube
+                      product_config_name: default
+                      repository_project: https://github.com/ngallegos-ib/goHelloWorldServer
+                      repository_branch: master
+                      product_access_token: <+secrets.getValue("sonarqube_tutorial_key")>
+                      product_domain: https://sonarqube.intellibridgelabs.io/
+                      product_project_name: harness-tutorial-pipeline
+                      product_project_key: harness-tutorial-pipeline
+        variables:
+          - name: SONARQUBE_ACCESS_KEY
+            type: Secret
+            description: ""
+            value: sonarqube_tutorial_key
     - stage:
         name: Run Integration Test
         identifier: Run_Integration_Test
