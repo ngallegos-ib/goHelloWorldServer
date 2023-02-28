@@ -49,3 +49,33 @@ pipeline:
                     repo: nargallegos/ciquickstart
                     tags:
                       - <+pipeline.sequenceId>
+    - stage:
+        name: Run Integration Test
+        identifier: Run_Integration_Test
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            useFromStage: Build_Test_and_Push
+          serviceDependencies:
+            - identifier: Run_Hello_World_Server
+              name: Run Hello World Server
+              type: Service
+              spec:
+                connectorRef: Docker_Quickstart
+                image: nargallegos/ciquickstart:<+pipeline.sequenceId>
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: test connection to server
+                  identifier: test_connection_to_server
+                  spec:
+                    connectorRef: Docker_Quickstart
+                    image: curlimages/curl:7.73.0
+                    shell: Sh
+                    command: |-
+                      sleep 10  
+                      curl localhost:8080  
+                      curl localhost:8080?Hello!_I_am_a_nice_demo!
