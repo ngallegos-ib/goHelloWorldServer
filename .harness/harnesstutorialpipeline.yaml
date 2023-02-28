@@ -21,7 +21,7 @@ pipeline:
           infrastructure:
             type: KubernetesDirect
             spec:
-              connectorRef: testkube
+              connectorRef: account.k8salethixlabsio
               namespace: harness-delegate-ng
               automountServiceAccountToken: true
               nodeSelector: {}
