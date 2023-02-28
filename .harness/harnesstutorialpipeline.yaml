@@ -59,7 +59,7 @@ pipeline:
             description: ""
             value: sonarqube_tutorial_key
     - stage:
-        name: Sonarqube
+        name: Security Scans
         identifier: Sonarqube
         type: SecurityTests
         spec:
@@ -95,23 +95,35 @@ pipeline:
                       done  
                       echo "Docker Service Ready"  
                       docker ps  
-              - step:
-                  type: Security
-                  name: Sonarqube Scan
-                  identifier: Sonarqube_Scan
-                  spec:
-                    privileged: true
-                    settings:
-                      policy_type: orchestratedScan
-                      scan_type: repository
-                      product_name: sonarqube
-                      product_config_name: default
-                      repository_project: https://github.com/ngallegos-ib/goHelloWorldServer
-                      repository_branch: master
-                      product_access_token: <+secrets.getValue("sonarqube_tutorial_key")>
-                      product_domain: https://sonarqube.intellibridgelabs.io/
-                      product_project_name: harness-tutorial-pipeline
-                      product_project_key: harness-tutorial-pipeline
+              - parallel:
+                  - step:
+                      type: Security
+                      name: Sonarqube Scan
+                      identifier: Sonarqube_Scan
+                      spec:
+                        privileged: true
+                        settings:
+                          policy_type: orchestratedScan
+                          scan_type: repository
+                          product_name: sonarqube
+                          product_config_name: default
+                          repository_project: https://github.com/ngallegos-ib/goHelloWorldServer
+                          repository_branch: master
+                          product_access_token: <+secrets.getValue("sonarqube_tutorial_key")>
+                          product_domain: https://sonarqube.intellibridgelabs.io/
+                          product_project_name: harness-tutorial-pipeline
+                          product_project_key: harness-tutorial-pipeline
+                  - step:
+                      type: Security
+                      name: OWASP
+                      identifier: OWASP
+                      spec:
+                        privileged: true
+                        settings:
+                          policy_type: orchestratedScan
+                          scan_type: repository
+                          product_name: owasp
+                          product_config_name: default
         variables:
           - name: SONARQUBE_ACCESS_KEY
             type: Secret
