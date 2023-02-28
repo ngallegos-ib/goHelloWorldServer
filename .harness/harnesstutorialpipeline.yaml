@@ -76,6 +76,9 @@ pipeline:
               spec:
                 connectorRef: docker_dind
                 image: docker:dind
+                resources:
+                  limits:
+                    memory: 2G
           execution:
             steps:
               - step:
