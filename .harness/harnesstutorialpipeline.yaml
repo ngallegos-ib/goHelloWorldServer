@@ -76,6 +76,7 @@ pipeline:
               spec:
                 connectorRef: docker_dind
                 image: docker:dind
+                privileged: true
                 resources:
                   limits:
                     memory: 2G
