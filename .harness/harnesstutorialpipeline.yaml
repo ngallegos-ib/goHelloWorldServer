@@ -124,7 +124,7 @@ pipeline:
                           policy_type: orchestratedScan
                           scan_type: repository
                           product_name: owasp
-                          product_config_name: owasp 5.3
+                          product_config_name: owasp 5.3.0
                           repository_project: https://github.com/ngallegos-ib/goHelloWorldServer
                           repository_branch: <+codebase.branch>
                         imagePullPolicy: Always
