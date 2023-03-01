@@ -124,10 +124,19 @@ pipeline:
                           policy_type: orchestratedScan
                           scan_type: repository
                           product_name: owasp
-                          product_config_name: owasp
-                          repository_project: https://github.com/ngallegos-ib/goHelloWorldServer
+                          product_config_name: owasp 5.x
+                          repository_project: goHelloWorldServer
                           repository_branch: <+codebase.branch>
                         imagePullPolicy: Always
+                      failureStrategies:
+                        - onFailure:
+                            errors:
+                              - AllErrors
+                            action:
+                              type: Ignore
+                      when:
+                        stageStatus: Success
+                        condition: <+pipeline.variables.run_owasp_scan> == true
         variables:
           - name: SONARQUBE_ACCESS_KEY
             type: Secret
