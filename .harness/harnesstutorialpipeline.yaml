@@ -125,7 +125,7 @@ pipeline:
                           product_name: owasp
                           product_config_name: default
                           repository_project: goHelloWorldServer
-                          repository_branch: <+codebase.branch+>
+                          repository_branch: <+codebase.branch>
         variables:
           - name: SONARQUBE_ACCESS_KEY
             type: Secret
