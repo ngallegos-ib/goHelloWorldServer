@@ -125,7 +125,7 @@ pipeline:
                           scan_type: repository
                           product_name: owasp
                           product_config_name: default
-                          repository_project: goHelloWorldServer
+                          repository_project: https://github.com/ngallegos-ib/goHelloWorldServer
                           repository_branch: <+codebase.branch>
         variables:
           - name: SONARQUBE_ACCESS_KEY
