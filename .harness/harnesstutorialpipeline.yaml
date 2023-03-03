@@ -149,7 +149,7 @@ pipeline:
                           --scan /src \
                           --format "ALL" \
                           --project "$DC_PROJECT" \
-                          --out /shared/customer_artifacts/report.json
+                          --out /report
                     envVariables:
                       DC_VERSION: "\"latest\""
                       DC_DIRECTORY: "\"dependency-check scan: $(pwd)\""
