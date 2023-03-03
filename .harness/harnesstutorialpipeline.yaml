@@ -45,6 +45,8 @@ pipeline:
                         paths:
                           - "*.xml"
                   failureStrategies: []
+                  when:
+                    stageStatus: Failure
               - step:
                   type: BuildAndPushDockerRegistry
                   name: Build and push an image to Docker Registry
@@ -54,6 +56,9 @@ pipeline:
                     repo: nargallegos/ciquickstart
                     tags:
                       - <+pipeline.sequenceId>
+                  when:
+                    stageStatus: Failure
+                  failureStrategies: []
         variables:
           - name: SONARQUBE_ACCESS_KEY
             type: Secret
@@ -98,6 +103,21 @@ pipeline:
                       done  
                       echo "Docker Service Ready"  
                       docker ps  
+                  failureStrategies: []
+              - step:
+                  type: Run
+                  name: OWASP Scan
+                  identifier: OWASP_Scan
+                  spec:
+                    connectorRef: docker_alpine
+                    image: docker:dind
+                    shell: Sh
+                    command: |-
+                      while ! docker ps ;do   
+                            echo "Docker not available yet"  
+                      done  
+                      echo "Docker Service Ready"  
+                      docker ps  
 
                       if [ ! -d "$DATA_DIRECTORY" ]; then
                           echo "Initially creating persistent directory: $DATA_DIRECTORY"
@@ -107,7 +127,9 @@ pipeline:
                           echo "Initially creating persistent directory: $CACHE_DIRECTORY"
                           mkdir -p "$CACHE_DIRECTORY"
                       fi
+                      ls -lhart
 
+                      # Make sure we are using the latest version
                       docker pull owasp/dependency-check:$DC_VERSION
 
                       docker run --rm \
@@ -123,7 +145,7 @@ pipeline:
                           --out /report
                     envVariables:
                       DC_VERSION: "\"latest\""
-                      DC_DIRECTORY: $HOME/OWASP-Dependency-Check$HOME/OWASP-Dependency-Check
+                      DC_DIRECTORY: "\"dependency-check scan: $(pwd)\""
                       DC_PROJECT: "\"dependency-check scan: $(pwd)\""
                       DATA_DIRECTORY: "\"$DC_DIRECTORY/data\""
                       CACHE_DIRECTORY: "\"$DC_DIRECTORY/data/cache\""
