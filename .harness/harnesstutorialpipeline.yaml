@@ -150,6 +150,7 @@ pipeline:
                           --format "ALL" \
                           --project "$DC_PROJECT" \
                           --out /report
+                    privileged: true
                     envVariables:
                       DC_VERSION: "\"latest\""
                       DC_DIRECTORY: "\"dependency-check scan: $(pwd)\""
