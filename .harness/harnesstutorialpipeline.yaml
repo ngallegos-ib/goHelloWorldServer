@@ -44,6 +44,7 @@ pipeline:
                       spec:
                         paths:
                           - "*.xml"
+                  failureStrategies: []
               - step:
                   type: BuildAndPushDockerRegistry
                   name: Build and push an image to Docker Registry
@@ -67,6 +68,7 @@ pipeline:
           sharedPaths:
             - /var/run
             - /var/lib/docker
+            - /shared/customer_artifacts
           infrastructure:
             useFromStage: Build_Test_and_Push
           serviceDependencies:
@@ -96,6 +98,35 @@ pipeline:
                       done  
                       echo "Docker Service Ready"  
                       docker ps  
+
+                      if [ ! -d "$DATA_DIRECTORY" ]; then
+                          echo "Initially creating persistent directory: $DATA_DIRECTORY"
+                          mkdir -p "$DATA_DIRECTORY"
+                      fi
+                      if [ ! -d "$CACHE_DIRECTORY" ]; then
+                          echo "Initially creating persistent directory: $CACHE_DIRECTORY"
+                          mkdir -p "$CACHE_DIRECTORY"
+                      fi
+
+                      docker pull owasp/dependency-check:$DC_VERSION
+
+                      docker run --rm \
+                          -e user=$USER \
+                          -u $(id -u ${USER}):$(id -g ${USER}) \
+                          --volume $(pwd):/src:z \
+                          --volume "$DATA_DIRECTORY":/usr/share/dependency-check/data:z \
+                          --volume $(pwd)/odc-reports:/report:z \
+                          owasp/dependency-check:$DC_VERSION \
+                          --scan /src \
+                          --format "ALL" \
+                          --project "$DC_PROJECT" \
+                          --out /report
+                    envVariables:
+                      DC_VERSION: "\"latest\""
+                      DC_DIRECTORY: $HOME/OWASP-Dependency-Check$HOME/OWASP-Dependency-Check
+                      DC_PROJECT: "\"dependency-check scan: $(pwd)\""
+                      DATA_DIRECTORY: "\"$DC_DIRECTORY/data\""
+                      CACHE_DIRECTORY: "\"$DC_DIRECTORY/data/cache\""
               - parallel:
                   - step:
                       type: Security
@@ -114,6 +145,7 @@ pipeline:
                           product_domain: https://sonarqube.intellibridgelabs.io/
                           product_project_name: harness-tutorial-pipeline
                           product_project_key: harness-tutorial-pipeline
+                      failureStrategies: []
                   - step:
                       type: Security
                       name: OWASP
@@ -121,7 +153,7 @@ pipeline:
                       spec:
                         privileged: true
                         settings:
-                          policy_type: orchestratedScan
+                          policy_type: ingestionOnly
                           scan_type: repository
                           product_name: owasp
                           product_config_name: owasp 5.x
@@ -145,7 +177,6 @@ pipeline:
     - stage:
         name: Run Integration Test
         identifier: Run_Integration_Test
-        description: ""
         type: CI
         spec:
           cloneCodebase: true
@@ -172,3 +203,4 @@ pipeline:
                       sleep 10  
                       curl localhost:8080  
                       curl localhost:8080?Hello!_I_am_a_nice_demo!
+        variables: []
