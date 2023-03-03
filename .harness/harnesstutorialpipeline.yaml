@@ -192,7 +192,7 @@ pipeline:
                           product_config_name: owasp 5.x
                           repository_project: goHelloWorldServer
                           repository_branch: <+codebase.branch>
-                          manual_upload_filename: report.json
+                          manual_upload_filename: dependency-check-report.json
                           customer_artifacts_path: /shared/customer_artifacts
                         imagePullPolicy: Always
                       failureStrategies:
