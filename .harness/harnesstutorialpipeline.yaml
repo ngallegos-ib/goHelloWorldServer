@@ -86,7 +86,8 @@ pipeline:
                 privileged: true
                 resources:
                   limits:
-                    memory: 2G
+                    memory: 6G
+                    cpu: 1000m
           execution:
             steps:
               - step:
@@ -148,13 +149,17 @@ pipeline:
                           --scan /src \
                           --format "ALL" \
                           --project "$DC_PROJECT" \
-                          --out /report
+                          --out /shared/customer_artifacts/report.json
                     envVariables:
                       DC_VERSION: "\"latest\""
                       DC_DIRECTORY: "\"dependency-check scan: $(pwd)\""
                       DC_PROJECT: "\"dependency-check scan: $(pwd)\""
                       DATA_DIRECTORY: "\"$DC_DIRECTORY/data\""
                       CACHE_DIRECTORY: "\"$DC_DIRECTORY/data/cache\""
+                    resources:
+                      limits:
+                        memory: 2G
+                        cpu: 1000m
               - parallel:
                   - step:
                       type: Security
@@ -187,6 +192,8 @@ pipeline:
                           product_config_name: owasp 5.x
                           repository_project: goHelloWorldServer
                           repository_branch: <+codebase.branch>
+                          manual_upload_filename: report.json
+                          customer_artifacts_path: /shared/customer_artifacts
                         imagePullPolicy: Always
                       failureStrategies:
                         - onFailure:
